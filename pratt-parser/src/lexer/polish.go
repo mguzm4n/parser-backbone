@@ -16,8 +16,8 @@ func (s *SNot) String() {
 	case (s.Head.Type != Atom) && len(s.Tail) > 0:
 		fmt.Print("(", s.Head.Value)
 		for _, item := range s.Tail {
-			fmt.Println(item.Head.Value)
+			fmt.Print(item.Head.Value)
 		}
-		fmt.Print(")\n")
+		fmt.Println(")")
 	}
 }
