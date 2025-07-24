@@ -20,12 +20,12 @@ func New(input string) *Lexer {
 		case unicode.IsDigit(r):
 			tokens = append(tokens, Token{
 				Type:  Atom,
-				Value: Char(r),
+				Value: r,
 			})
 		case unicode.IsSymbol(r), unicode.IsPunct(r):
 			tokens = append(tokens, Token{
 				Type:  Op,
-				Value: Char(r),
+				Value: r,
 			})
 		}
 	}
