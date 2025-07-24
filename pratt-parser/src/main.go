@@ -6,6 +6,19 @@ import (
 	"mguzm4n/pratt-parser/src/parser"
 )
 
+/*
+Ex. -1 => - binds 1 to the right
+*/
+func prefixBindingPower(atom parser.Atom) (interface{}, uint8) {
+	switch atom.Char {
+	case '+', '-':
+		return nil, 5
+	default:
+		fmt.Printf("%+v\n", atom)
+		panic("bad operation atom value")
+	}
+}
+
 func infixBindingPower(atom parser.Atom) (uint8, uint8) {
 	switch atom.Char {
 	case '+', '-':
@@ -20,7 +33,7 @@ func infixBindingPower(atom parser.Atom) (uint8, uint8) {
 
 func expr(input string) parser.Node {
 	lex := lexer.New(input)
-	lex.DbgPrintTokens()
+	// lex.DbgPrintTokens()
 
 	return exprBp(lex, 0)
 }
@@ -32,6 +45,14 @@ func exprBp(lex *lexer.Lexer, minBp uint8) parser.Node {
 	case lexer.Atom:
 		lhs = parser.Atom{
 			Char: next.Value,
+		}
+	case lexer.Op: // possible unary operator
+		op := parser.Atom{Char: next.Value}
+		_, rBp := prefixBindingPower(op)
+		rhs := exprBp(lex, rBp)
+		lhs = parser.Cons{
+			Head: op.Char,
+			Tail: []parser.Node{rhs},
 		}
 	default:
 		fmt.Printf("%+v\n", next)
@@ -77,6 +98,6 @@ func exprBp(lex *lexer.Lexer, minBp uint8) parser.Node {
 }
 
 func main() {
-	s := expr("1 + 2")
+	s := expr("-1 + 2 * 3")
 	fmt.Print(s.String())
 }
