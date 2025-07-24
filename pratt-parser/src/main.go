@@ -3,35 +3,35 @@ package main
 import (
 	"fmt"
 	"mguzm4n/pratt-parser/src/lexer"
+	"mguzm4n/pratt-parser/src/parser"
 )
 
-func infixBindingPower(token lexer.Token) (uint8, uint8) {
-	switch token.Value {
+func infixBindingPower(atom parser.Atom) (uint8, uint8) {
+	switch atom.Char {
 	case '+', '-':
 		return 1, 2
 	case '*', '/':
 		return 3, 4
 	default:
-		fmt.Printf("%+v\n", token)
-		panic("bad operation token value")
+		fmt.Printf("%+v\n", atom)
+		panic("bad operation atom value")
 	}
 }
 
-func expr(input string) lexer.SNot {
+func expr(input string) parser.Node {
 	lex := lexer.New(input)
 	lex.DbgPrintTokens()
 
 	return exprBp(lex, 0)
 }
 
-func exprBp(lex *lexer.Lexer, minBp uint8) lexer.SNot {
-	var lhs lexer.SNot
+func exprBp(lex *lexer.Lexer, minBp uint8) parser.Node {
+	var lhs parser.Node
 
 	switch next := lex.Next(); next.Type {
 	case lexer.Atom:
-		lhs.Head = lexer.Token{
-			Type:  lexer.Atom,
-			Value: next.Value,
+		lhs = parser.Atom{
+			Char: next.Value,
 		}
 	default:
 		fmt.Printf("%+v\n", next)
@@ -40,16 +40,14 @@ func exprBp(lex *lexer.Lexer, minBp uint8) lexer.SNot {
 
 	for {
 		onEof := false
-		var op lexer.Token
-		_ = op
+		var op parser.Atom
 
 		switch next := lex.Peek(); next.Type {
 		case lexer.Eof:
 			onEof = true
 		case lexer.Op:
-			op = lexer.Token{
-				Type:  lexer.Op,
-				Value: next.Value,
+			op = parser.Atom{
+				Char: next.Value,
 			}
 		default:
 			fmt.Printf("%+v\n", next)
@@ -67,9 +65,9 @@ func exprBp(lex *lexer.Lexer, minBp uint8) lexer.SNot {
 
 		lex.Next()
 		rhs := exprBp(lex, rBp)
-		lhs = lexer.SNot{
-			Head: op,
-			Tail: []lexer.SNot{
+		lhs = parser.Cons{
+			Head: op.Char,
+			Tail: []parser.Node{
 				lhs, rhs,
 			},
 		}
@@ -80,5 +78,5 @@ func exprBp(lex *lexer.Lexer, minBp uint8) lexer.SNot {
 
 func main() {
 	s := expr("1 + 2")
-	s.String()
+	fmt.Print(s.String())
 }
