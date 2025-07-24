@@ -26,7 +26,7 @@ func infixBindingPower(atom parser.Atom) (uint8, uint8, error) {
 		return 1, 2, nil
 	case '*', '/':
 		return 3, 4, nil
-	default:
+	default: // catch closing parenthesis
 		return 1, 2, errors.New("")
 	}
 }
@@ -41,18 +41,18 @@ func expr(input string) parser.Node {
 func exprBp(lex *lexer.Lexer, minBp uint8) parser.Node {
 	var lhs parser.Node
 
-	switch next := lex.Next(); next.Type {
-	case lexer.Atom:
+	switch tok := lex.Next(); {
+	case tok.Type == lexer.Atom:
 		lhs = parser.Atom{
-			Char: next.Value,
+			Char: tok.Value,
 		}
-	case lexer.OpOpenParen:
-		lhs = exprBp(lex, 0)
-		if lex.Next().Type != lexer.OpCloseParen {
+	case tok.Type == lexer.Op && tok.Value == '(':
+		lhs = exprBp(lex, 0) // keep parsing inside parenthesis
+		if next := lex.Next(); !(next.Type == lexer.Op && next.Value == ')') {
 			panic("bad token for op open parenthesis")
 		}
-	case lexer.Op: // possible unary operator
-		op := parser.Atom{Char: next.Value}
+	case tok.Type == lexer.Op: // possible unary operator
+		op := parser.Atom{Char: tok.Value}
 		_, rBp := prefixBindingPower(op)
 		rhs := exprBp(lex, rBp)
 		lhs = parser.Cons{
@@ -60,7 +60,7 @@ func exprBp(lex *lexer.Lexer, minBp uint8) parser.Node {
 			Tail: []parser.Node{rhs},
 		}
 	default:
-		fmt.Printf("%+v\n", next)
+		fmt.Printf("%+v\n", tok)
 		panic("bad token for lhs")
 	}
 
@@ -71,7 +71,7 @@ func exprBp(lex *lexer.Lexer, minBp uint8) parser.Node {
 		switch next := lex.Peek(); next.Type {
 		case lexer.Eof:
 			onEof = true
-		case lexer.Op, lexer.OpCloseParen:
+		case lexer.Op:
 			op = parser.Atom{
 				Char: next.Value,
 			}
@@ -107,6 +107,6 @@ func exprBp(lex *lexer.Lexer, minBp uint8) parser.Node {
 }
 
 func main() {
-	s := expr("(-1 + 2) * 3")
+	s := expr("1 + 2")
 	fmt.Print(s.String())
 }

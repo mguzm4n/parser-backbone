@@ -23,28 +23,16 @@ func New(input string) *Lexer {
 	tokens := []Token{}
 
 	for _, r := range input {
+		tok := Token{Value: r}
 		switch {
 		case unicode.IsSpace(r):
 			continue
 		case unicode.IsDigit(r):
-			tokens = append(tokens, Token{
-				Type:  Atom,
-				Value: r,
-			})
-		case isRoundParen(r):
-			tok := Token{Value: r}
-			if r == '(' {
-				tok.Type = OpOpenParen
-			} else {
-				tok.Type = OpCloseParen
-			}
-			tokens = append(tokens, tok)
-		case isOperation(r):
-			tokens = append(tokens, Token{
-				Type:  Op,
-				Value: r,
-			})
+			tok.Type = Atom
+		case isOperation(r), isRoundParen(r):
+			tok.Type = Op
 		}
+		tokens = append(tokens, tok)
 	}
 
 	sliceutils.Reverse(tokens)
