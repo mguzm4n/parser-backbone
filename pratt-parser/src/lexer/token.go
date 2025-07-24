@@ -7,11 +7,17 @@ type TokenType int
 const (
 	Atom TokenType = iota
 	Op
+	OpOpenParen
+	OpCloseParen
 	Eof
 )
 
 var tokNames = [...]string{
-	"Atom", "Op", "Eof",
+	"Atom",
+	"Op",
+	"OpOpenParen",
+	"OpCloseParen",
+	"Eof",
 }
 
 type Token struct {

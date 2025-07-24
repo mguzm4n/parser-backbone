@@ -3,11 +3,20 @@ package lexer
 import (
 	"fmt"
 	"mguzm4n/pratt-parser/src/sliceutils"
+	"strings"
 	"unicode"
 )
 
 type Lexer struct {
 	tokens []Token
+}
+
+func isRoundParen(c rune) bool {
+	return c == '(' || c == ')'
+}
+
+func isOperation(c rune) bool {
+	return strings.ContainsRune("+-*/", c)
 }
 
 func New(input string) *Lexer {
@@ -22,7 +31,15 @@ func New(input string) *Lexer {
 				Type:  Atom,
 				Value: r,
 			})
-		case unicode.IsSymbol(r), unicode.IsPunct(r):
+		case isRoundParen(r):
+			tok := Token{Value: r}
+			if r == '(' {
+				tok.Type = OpOpenParen
+			} else {
+				tok.Type = OpCloseParen
+			}
+			tokens = append(tokens, tok)
+		case isOperation(r):
 			tokens = append(tokens, Token{
 				Type:  Op,
 				Value: r,

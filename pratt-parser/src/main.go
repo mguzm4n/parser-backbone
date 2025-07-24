@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"mguzm4n/pratt-parser/src/lexer"
 	"mguzm4n/pratt-parser/src/parser"
@@ -19,15 +20,14 @@ func prefixBindingPower(atom parser.Atom) (interface{}, uint8) {
 	}
 }
 
-func infixBindingPower(atom parser.Atom) (uint8, uint8) {
+func infixBindingPower(atom parser.Atom) (uint8, uint8, error) {
 	switch atom.Char {
 	case '+', '-':
-		return 1, 2
+		return 1, 2, nil
 	case '*', '/':
-		return 3, 4
+		return 3, 4, nil
 	default:
-		fmt.Printf("%+v\n", atom)
-		panic("bad operation atom value")
+		return 1, 2, errors.New("")
 	}
 }
 
@@ -45,6 +45,11 @@ func exprBp(lex *lexer.Lexer, minBp uint8) parser.Node {
 	case lexer.Atom:
 		lhs = parser.Atom{
 			Char: next.Value,
+		}
+	case lexer.OpOpenParen:
+		lhs = exprBp(lex, 0)
+		if lex.Next().Type != lexer.OpCloseParen {
+			panic("bad token for op open parenthesis")
 		}
 	case lexer.Op: // possible unary operator
 		op := parser.Atom{Char: next.Value}
@@ -66,7 +71,7 @@ func exprBp(lex *lexer.Lexer, minBp uint8) parser.Node {
 		switch next := lex.Peek(); next.Type {
 		case lexer.Eof:
 			onEof = true
-		case lexer.Op:
+		case lexer.Op, lexer.OpCloseParen:
 			op = parser.Atom{
 				Char: next.Value,
 			}
@@ -79,7 +84,11 @@ func exprBp(lex *lexer.Lexer, minBp uint8) parser.Node {
 			break
 		}
 
-		lBp, rBp := infixBindingPower(op)
+		lBp, rBp, err := infixBindingPower(op)
+		if err != nil {
+			break
+		}
+
 		if lBp < minBp {
 			break
 		}
@@ -98,6 +107,6 @@ func exprBp(lex *lexer.Lexer, minBp uint8) parser.Node {
 }
 
 func main() {
-	s := expr("-1 + 2 * 3")
+	s := expr("(-1 + 2) * 3")
 	fmt.Print(s.String())
 }
