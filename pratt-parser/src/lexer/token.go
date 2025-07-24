@@ -1,10 +1,6 @@
 package lexer
 
-import (
-	"fmt"
-)
-
-type Char rune
+import "fmt"
 
 type TokenType int
 
@@ -14,18 +10,26 @@ const (
 	Eof
 )
 
+var tokNames = [...]string{
+	"Atom", "Op", "Eof",
+}
+
 type Token struct {
 	Type  TokenType
-	Value Char
+	Value rune
 }
 
 func EOF() Token {
 	return Token{
 		Type:  Eof,
-		Value: Char(0),
+		Value: rune('0'),
 	}
 }
 
-func (c Char) String() string {
-	return fmt.Sprintf("%q", rune(c))
+func (tt TokenType) String() string {
+	return tokNames[tt]
+}
+
+func (t Token) String() string {
+	return fmt.Sprintf("{ Type: %s, Value: %q }", t.Type, t.Value)
 }
