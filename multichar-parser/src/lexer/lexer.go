@@ -72,7 +72,7 @@ func (l *Lexer) string() {
 	}
 
 	l.advance()
-	val := l.source[l.start+1 : l.current]
+	val := l.source[l.start+1 : l.current-1] // here, trim the quotes
 	l.addTokenLiteral(Str, val)
 }
 

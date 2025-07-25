@@ -43,5 +43,5 @@ func (tt TokenType) String() string {
 }
 
 func (t Token) String() string {
-	return fmt.Sprintf("{ Type: %s, Value: %s, Literal: %s }", t.Type, t.Lexeme, t.Literal)
+	return fmt.Sprintf("{ Type: %s, Lexeme: %s, Literal: %s }", t.Type, t.Lexeme, t.Literal)
 }
