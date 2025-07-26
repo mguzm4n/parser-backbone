@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	lex := lexer.New(`("what" + 1) "espacio"`)
+	lex := lexer.New(`"0.5 - 100" + "b"`)
 	lex.Scan()
 	lex.DbgPrintTokens()
 
@@ -23,7 +23,12 @@ func main() {
 	rdParser := parser.NewParser(lex.Tokens())
 	expr := rdParser.Parse()
 
-	visitor := parser.StringVisitor{}
-	fmt.Println(visitor.Print(expr))
+	interpreter := parser.NewInterpreter()
+	err := interpreter.Interpret(expr)
+	if err != nil {
+		fmt.Printf("%v", err)
+	}
 
+	// visitor := parser.StringVisitor{}
+	// fmt.Println(visitor.Print(expr))
 }

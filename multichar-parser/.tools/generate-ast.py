@@ -4,7 +4,7 @@ from pathlib import Path
 def define_visitor(program: list[str], base_name, types: dict[str, list[str]]):
   program.append("type Visitor interface {")
   for (type, _) in types.items():
-    program.append(f"Visit{type}{base_name}(expr *{type}) any")
+    program.append(f"Visit{type}{base_name}(expr *{type}) (any, error)")
   program.append("}")
 
 
@@ -16,7 +16,7 @@ def define_ast(out: Path, base_name: str, types: dict[str, list[str]]):
   
   program.append(f"type {base_name} interface {{")
   program.append("isExpr()")
-  program.append("Accept (v Visitor) any")
+  program.append("Accept (v Visitor) (any, error)")
   program.append("}")
   
   for (baseType, members) in types.items(): 
@@ -32,7 +32,7 @@ def define_ast(out: Path, base_name: str, types: dict[str, list[str]]):
     program.append(f"func (*{baseType}) isExpr() {{ }}")
     
     # visitor pattern
-    program.append(f"func ({baseType[0].lower()} *{baseType}) Accept(v Visitor) any {{")
+    program.append(f"func ({baseType[0].lower()} *{baseType}) Accept(v Visitor) (any, error) {{")
     program.append(f"return v.Visit{baseType}{base_name}({baseType[0].lower()})")
     program.append("}")
     
