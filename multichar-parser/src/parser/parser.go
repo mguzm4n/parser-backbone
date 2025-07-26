@@ -41,8 +41,8 @@ func (p *Parser) checkNextAgainst(tkn lexer.TokenType) bool {
 }
 
 func (p *Parser) match(tokens ...lexer.TokenType) bool {
-	for tkn := range tokens {
-		if p.checkNextAgainst(lexer.TokenType(tkn)) {
+	for _, tkn := range tokens {
+		if p.checkNextAgainst(tkn) {
 			p.advance()
 			return true
 		}
@@ -112,10 +112,54 @@ func (p *Parser) unary() Expr {
 		right := p.unary()
 		return NewUnary(op, right)
 	}
-	return primary()
+	return p.primary()
+}
+
+func (p *Parser) consume(tt lexer.TokenType, msg string) {
+	if p.checkNextAgainst(tt) {
+		p.advance()
+		return
+	}
+	panic(msg)
 }
 
 func (p *Parser) primary() Expr {
-	if p.match(lexer.False) return NewLiteral(false)
-	if p.match(lexer.True) return NewLiteral(true)
+	if p.match(lexer.False) {
+		return NewLiteral(false)
+	}
+	if p.match(lexer.True) {
+		return NewLiteral(true)
+	}
+	if p.match(lexer.Nil) {
+		return NewLiteral(nil)
+	}
+	if p.match(lexer.Num, lexer.Str) {
+		return NewLiteral(p.previous().Literal)
+	}
+	if p.match(lexer.LParen) {
+		expr := p.expression()
+		p.consume(lexer.RParen, "[primary parsing] expected ')' after expression")
+		return NewGrouping(expr)
+	}
+
+	panic("[primary parsing] no terminal match")
+}
+
+func (p *Parser) synchronize() {
+	p.advance()
+	for !p.isAtEnd() {
+		if p.previous().Type == lexer.SColon {
+			return
+		}
+
+		switch p.peek().Type {
+		case lexer.Return:
+			return
+		}
+	}
+	p.advance()
+}
+
+func (p *Parser) Parse() Expr {
+	return p.expression()
 }
