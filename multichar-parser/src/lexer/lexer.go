@@ -24,8 +24,10 @@ func (l *Lexer) Tokens() []Token {
 }
 
 func (l *Lexer) addToken(tt TokenType) {
+	txt := l.source[l.start:l.current]
 	l.tokens = append(l.tokens, Token{
-		Type: tt,
+		Type:   tt,
+		Lexeme: txt,
 	})
 }
 
@@ -140,6 +142,7 @@ func (l *Lexer) Scan() []Token {
 		l.scanToken()
 	}
 
+	l.tokens = append(l.tokens, Token{Type: Eof})
 	return l.tokens
 }
 
