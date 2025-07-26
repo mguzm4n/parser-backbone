@@ -4,7 +4,7 @@ from pathlib import Path
 def define_visitor(program: list[str], base_name, types: dict[str, list[str]]):
   program.append("type Visitor interface {")
   for (type, _) in types.items():
-    program.append(f"Visit{type}{base_name}(expr *{type}) interface{{}}")
+    program.append(f"Visit{type}{base_name}(expr *{type}) any")
   program.append("}")
 
 
@@ -16,22 +16,24 @@ def define_ast(out: Path, base_name: str, types: dict[str, list[str]]):
   
   program.append(f"type {base_name} interface {{")
   program.append("isExpr()")
-  program.append("Accept (v Visitor) interface{}")
+  program.append("Accept (v Visitor) any")
   program.append("}")
   
-  for (type, members) in types.items(): 
+  for (baseType, members) in types.items(): 
     
     # define struct
-    program.append(f"type {type} struct {{")
-    program.append("\n".join(members))
+    program.append(f"type {baseType} struct {{")
+    for member in members:
+      name, memType = member.split(" ")
+      program.append(f"{name} {memType}")
     program.append("}")
     
     # interface compliance
-    program.append(f"func ({type}) isExpr() {{ }}")
+    program.append(f"func (*{baseType}) isExpr() {{ }}")
     
     # visitor pattern
-    program.append(f"func ({type[0].lower()} *{type}) Accept(visitor Visitor) interface{{}} {{")
-    program.append(f"return visitor.Visit{type}{base_name}({type[0].lower()})")
+    program.append(f"func ({baseType[0].lower()} *{baseType}) Accept(v Visitor) any {{")
+    program.append(f"return v.Visit{baseType}{base_name}({baseType[0].lower()})")
     program.append("}")
     
     # constructor and fields
@@ -39,8 +41,8 @@ def define_ast(out: Path, base_name: str, types: dict[str, list[str]]):
     inst_members = ", ".join(
       list(map(lambda s: s.split(" ")[0], members))
     )
-    program.append(f"func New{type}({cons_members}) *{type} {{")
-    program.append(f"return &{type}{{")
+    program.append(f"func New{baseType}({cons_members}) *{baseType} {{")
+    program.append(f"return &{baseType}{{")
     program.append(inst_members + ",")
     program.append("}")
     program.append("}")
