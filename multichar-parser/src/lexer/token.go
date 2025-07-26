@@ -28,6 +28,15 @@ const (
 	False
 	True
 	Nil
+	SColon
+	Class
+	Fun
+	Var
+	For
+	If
+	While
+	Print
+	Return
 )
 
 var tokNames = [...]string{
@@ -54,6 +63,15 @@ var tokNames = [...]string{
 	"False",
 	"True",
 	"Nil",
+	"SColon",
+	"Class",
+	"Fun",
+	"Var",
+	"For",
+	"If",
+	"While",
+	"Print",
+	"Return",
 }
 
 type Token struct {
