@@ -16,6 +16,18 @@ const (
 	Div
 	Str
 	Num
+	Bang
+	Eq
+	Bang_Eq
+	Eq_Eq
+	Gt
+	Geq
+	Ls
+	Leq
+	Slash
+	False
+	True
+	Nil
 )
 
 var tokNames = [...]string{
@@ -30,6 +42,18 @@ var tokNames = [...]string{
 	"Div",
 	"Str",
 	"Num",
+	"Bang",
+	"Eq",
+	"Bang_Eq",
+	"Eq_Eq",
+	"Gt",
+	"Geq",
+	"Ls",
+	"Leq",
+	"Slash",
+	"False",
+	"True",
+	"Nil",
 }
 
 type Token struct {

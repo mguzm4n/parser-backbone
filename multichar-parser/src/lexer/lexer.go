@@ -19,6 +19,10 @@ func New(input string) *Lexer {
 	}
 }
 
+func (l *Lexer) Tokens() []Token {
+	return l.tokens
+}
+
 func (l *Lexer) addToken(tt TokenType) {
 	l.tokens = append(l.tokens, Token{
 		Type: tt,
